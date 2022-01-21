@@ -1,0 +1,63 @@
+plugins {
+	id 'java'
+	id 'org.jetbrains.kotlin.jvm' version '1.6.10'
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
+}
+
+ext {
+	junitPlatformVersion = '1.8.2'
+	junitJupiterVersion = '5.8.2'
+	assertJVersion = '3.22.0'
+	mockitoVersion = '4.2.0'
+	jqwikVersion = '1.6.4-SNAPSHOT'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileTestJava {
+	options.compilerArgs += '-parameters'
+	options.encoding = 'UTF-8'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+	kotlinOptions {
+		freeCompilerArgs = [
+			"-Xjsr305=strict", // For strict type warnings
+			"-Xjsr305=under-migration:strict",
+			"-Xemit-jvm-type-annotations" // Required for annotations on type variables
+		]
+		jvmTarget = "16"
+		javaParameters = true // Required to get correct parameter names in reporting
+	}
+}
+
+test {
+	useJUnitPlatform()
+
+	include '**/*Properties.class'
+	include '**/*Test.class'
+	include '**/*Tests.class'
+	include '**/*Example.class'
+	include '**/*Examples.class'
+}
+
+dependencies {
+	implementation("org.jetbrains.kotlin:kotlin-stdlib")
+
+	testImplementation "net.jqwik:jqwik:${jqwikVersion}"
+	testImplementation "net.jqwik:jqwik-kotlin:${jqwikVersion}"
+
+	testImplementation("org.assertj:assertj-core:${assertJVersion}")
+	testImplementation("org.mockito:mockito-core:${mockitoVersion}")
+}
+
+wrapper {
+	gradleVersion = '7.3.3'
+}
